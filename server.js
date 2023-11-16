@@ -18,30 +18,26 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
   .catch(err => console.log(err));
 
 
-// Import Auth routes
 const authRoutes = require('./routes/authRoutes');
+const recipeRoutes = require('./routes/recipeRoutes');
 
-// Use Auth routes
+
+app.use('/api/recipes', recipeRoutes);
 app.use('/api/auth', authRoutes);
 
 
-// Handle undefined routes
 app.use((req, res, next) => {
   res.status(404).send("Sorry, that route doesn't exist.");
 });
 
-
-// Require the authentication middleware
 const authMiddleware = require('./middleware/authMiddleware');
 
-
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
 
-// Start the server
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
