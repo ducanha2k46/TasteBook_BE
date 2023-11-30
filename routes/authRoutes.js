@@ -62,7 +62,6 @@ module.exports = router;
 
 router.get('/profile', authMiddleware, async (req, res) => {
   try {
-
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ message: "Người dùng không tồn tại." });
@@ -70,5 +69,32 @@ router.get('/profile', authMiddleware, async (req, res) => {
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/change-password', authMiddleware, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+      return res.status(400).send({message :'Current and new password are required'});
+  }
+
+  try {
+      const user = await User.findById(req.user.id); 
+      if (!user) {
+          return res.status(404).send({message: 'Người dùng không tồn tại.'});
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+          return res.status(401).send({message: 'Incorrect password'});
+      }
+
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedNewPassword;
+      await user.save();
+
+      res.send({message: 'Password successfully changed'});
+  } catch (error) {
+      res.status(500).send({ message: error.message });
   }
 });
