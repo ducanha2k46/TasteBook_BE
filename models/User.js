@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   birthDate: { type: Date, required: true },
   gender: { type: String, required: true },
-  role: { type: String, default: 'user' } // Mặc định là 'user'
+  role: { type: String, default: 'user' }, // Mặc định là 'user'
+  avatarUrl: { type: String, default: 'https://www.gravatar.com/avatar/?d=identicon'}
 });
 
 module.exports = mongoose.model('User', userSchema);

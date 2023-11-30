@@ -11,6 +11,8 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -20,6 +22,11 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 
 const authRoutes = require('./routes/authRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
+const uploadRoutes = require('./routes/uploadRoutes'); 
+const userRoutes = require('./routes/userRoutes'); 
+app.use('/uploads', express.static('uploads'));
+app.use('/api/uploads', uploadRoutes);
+app.use('/api/user', userRoutes);
 
 
 app.use('/api/recipes', recipeRoutes);
