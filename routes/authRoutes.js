@@ -86,15 +86,34 @@ router.post('/change-password', authMiddleware, async (req, res) => {
 
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
-          return res.status(401).send({message: 'Incorrect password'});
+          return res.status(401).send({message: 'Sai mật khẩu'});
       }
 
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       user.password = hashedNewPassword;
       await user.save();
 
-      res.send({message: 'Password successfully changed'});
+      res.send({message: 'Đổi mật khẩu thành công'});
   } catch (error) {
       res.status(500).send({ message: error.message });
+  }
+});
+
+router.delete('/delete-account', authMiddleware, async (req, res) => {
+  try {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+          return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+      }
+
+      const isMatch = await bcrypt.compare(req.body.password, user.password);
+      if (!isMatch) {
+          return res.status(401).json({ message: "Sai mật khẩu" });
+      }
+
+      await User.deleteOne({ _id: req.user.id });
+      res.status(200).json({ message: "Xóa tài khoản thành công" });
+  } catch (error) {
+      res.status(500).json({ message: error.message });
   }
 });
