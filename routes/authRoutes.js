@@ -19,7 +19,8 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
       birthDate: req.body.birthDate,
       nickname: req.body.lastName + " " + req.body.firstName,
-      gender: req.body.gender
+      gender: req.body.gender,
+      biography: ''
     });
 
     const newUser = await user.save();
@@ -115,5 +116,23 @@ router.delete('/delete-account', authMiddleware, async (req, res) => {
       res.status(200).json({ message: "Xóa tài khoản thành công" });
   } catch (error) {
       res.status(500).json({ message: error.message });
+  }
+});
+
+router.patch('/update-profile', authMiddleware, async (req, res) => {
+  try {
+      const userId = req.user.id; // Lấy ID người dùng từ authMiddleware
+      const updateData = req.body; // Dữ liệu cập nhật
+
+      // Cập nhật thông tin người dùng
+      const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+      
+      if (!updatedUser) {
+          return res.status(404).send('User not found');
+      }
+
+      res.json({ message: 'Cập nhật thành công', user: updatedUser });
+  } catch (error) {
+      res.status(500).send(error.message);
   }
 });

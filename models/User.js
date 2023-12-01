@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
   gender: { type: String, required: true },
   role: { type: String, default: 'user' }, // Mặc định là 'user'
   avatarUrl: { type: String, default: 'https://www.gravatar.com/avatar/?d=identicon' },
-  biography: { type: String, defaule: '' }
+  biography: { type: String, required: false }
 });
 
 module.exports = mongoose.model('User', userSchema);
