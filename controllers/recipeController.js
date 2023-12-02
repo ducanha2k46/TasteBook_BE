@@ -1,4 +1,5 @@
 const Recipe = require('../models/recipeModel');
+const mongoose = require('mongoose');
 
 exports.getRandomRecipes = async (req, res) => {
     try {
@@ -41,3 +42,18 @@ exports.getSuggestions = async (req, res) => {
     }
 };
 
+
+exports.getRecipeById = async (req, res) => {
+    try {
+        const id = new mongoose.Types.ObjectId(req.params.id);
+        const recipe = await Recipe.findById(id);
+
+        if (!recipe) {
+            return res.status(404).json({ msg: 'Recipe not found' });
+        }
+        res.json(recipe);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send({message: 'Server Error'});
+    }
+};

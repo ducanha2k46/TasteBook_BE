@@ -7,5 +7,7 @@ router.get('/random', recipeController.getRandomRecipes);
 router.get('/search/:query', recipeController.searchRecipes);
 
 router.get('/suggest/:term', recipeController.getSuggestions);
+router.get('/:id', recipeController.getRecipeById);
+
 
 module.exports = router;

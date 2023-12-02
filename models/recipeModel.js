@@ -20,11 +20,11 @@ const recipeSchema = new mongoose.Schema({
     salt: String
   },
   times: {
-    preparation: String,
-    cooking: String
+    Preparation: String,
+    Cooking: String
   },
   serves: Number,
-  difficulty: String,
+  difficult: String,
   vote_count: Number,
   subcategory: String,
   dish_type: String,
