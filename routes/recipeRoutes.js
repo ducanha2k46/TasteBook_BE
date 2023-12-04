@@ -55,6 +55,22 @@ router.post('/remove-recipe/:recipeId', authMiddleware, async (req, res) => {
     }
 });
 
+router.get('/saved-recipes', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).populate('savedRecipes');
+        
+        if (!user) {
+            return res.status(404).send('Người dùng không tìm thấy');
+        }
+
+        res.status(200).json(user.savedRecipes);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Lỗi server');
+    }
+});
+
 router.get('/random', recipeController.getRandomRecipes);
 
 router.get('/search/:query', recipeController.searchRecipes);
