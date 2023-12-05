@@ -1,6 +1,18 @@
 const Recipe = require('../models/recipeModel');
 const mongoose = require('mongoose');
 
+
+exports.getRecipesByAuthor = async (req, res) => {
+    try {
+        const authorName = req.params.authorName;
+        console.log("Author name received:", authorName);
+        const recipes = await Recipe.find({ author: authorName });
+        res.json(recipes);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+};
+
 exports.getRandomRecipes = async (req, res) => {
     try {
         const recipes = await Recipe.aggregate([{ $sample: { size: 15 } }]);
@@ -18,7 +30,8 @@ exports.searchRecipes = async (req, res) => {
             $or: [
                 { name: { $regex: regexQuery } },
                 { description: { $regex: regexQuery } },
-                { ingredients: { $elemMatch: { $regex: regexQuery } } }
+                { ingredients: { $elemMatch: { $regex: regexQuery } } },
+                { author: {$regex: regexQuery}}
             ]
         });
         res.json(recipes);

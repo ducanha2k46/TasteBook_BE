@@ -71,6 +71,8 @@ router.get('/saved-recipes', authMiddleware, async (req, res) => {
     }
 });
 
+router.get('/author/:authorName', recipeController.getRecipesByAuthor);
+
 router.get('/random', recipeController.getRandomRecipes);
 
 router.get('/search/:query', recipeController.searchRecipes);
