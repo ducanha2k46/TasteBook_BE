@@ -18,7 +18,7 @@ router.post('/register', async (req, res) => {
       email: req.body.email,
       password: hashedPassword,
       birthDate: req.body.birthDate,
-      nickname: req.body.lastName + " " + req.body.firstName,
+      nickname: req.body.nickname,
       gender: req.body.gender,
       biography: ''
     });
@@ -121,10 +121,9 @@ router.delete('/delete-account', authMiddleware, async (req, res) => {
 
 router.patch('/update-profile', authMiddleware, async (req, res) => {
   try {
-      const userId = req.user.id; // Lấy ID người dùng từ authMiddleware
-      const updateData = req.body; // Dữ liệu cập nhật
+      const userId = req.user.id; 
+      const updateData = req.body;
 
-      // Cập nhật thông tin người dùng
       const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
       
       if (!updatedUser) {

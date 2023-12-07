@@ -24,4 +24,5 @@ router.post('/', upload.single('file'), (req, res) => {
   res.json({ success: true, avatarUrl: fileUrl });
 });
 
+
 module.exports = router;
