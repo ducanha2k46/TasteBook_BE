@@ -22,24 +22,36 @@ exports.getRandomRecipes = async (req, res) => {
     }
 };
 
+// exports.searchRecipes = async (req, res) => {
+//     try {
+//         const { query } = req.params;
+//         const regexQuery = new RegExp(query, 'i'); 
+//         const recipes = await Recipe.find({
+//             $or: [
+//                 { name: { $regex: regexQuery } },
+//                 { description: { $regex: regexQuery } },
+//                 { ingredients: { $elemMatch: { $regex: regexQuery } } },
+//                 { author: {$regex: regexQuery}}
+//             ]
+//         });
+//         res.json(recipes);
+//     } catch (err) {
+//         res.status(500).send(err);
+//     }
+// };
 exports.searchRecipes = async (req, res) => {
     try {
         const { query } = req.params;
-        const regexQuery = new RegExp(query, 'i'); 
+        const searchTerms = query.split(" ").map(term => new RegExp(term, 'i'));
         const recipes = await Recipe.find({
-            $or: [
-                { name: { $regex: regexQuery } },
-                { description: { $regex: regexQuery } },
-                { ingredients: { $elemMatch: { $regex: regexQuery } } },
-                { author: {$regex: regexQuery}}
-            ]
+            ingredients: { $all: searchTerms.map(term => ({ $elemMatch: { $regex: term } })) }
         });
+
         res.json(recipes);
     } catch (err) {
         res.status(500).send(err);
     }
 };
-
 
 
 exports.getSuggestions = async (req, res) => {
