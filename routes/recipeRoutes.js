@@ -8,25 +8,24 @@ const multer = require('multer');
 const path = require('path');
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/') // Đảm bảo thư mục này tồn tại hoặc được tạo tự động
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
-  }
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/') 
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+    }
 });
 
 const upload = multer({ storage: storage });
 router.post('/save-recipe/:recipeId', authMiddleware, async (req, res) => {
-    const userId = req.user.id; // Lấy ID người dùng từ middleware xác thực
-    const { recipeId } = req.params; // Lấy ID công thức từ URL
+    const userId = req.user.id;
+    const { recipeId } = req.params; 
     console.log('UserId:', userId, 'RecipeId:', recipeId);
 
     try {
-        // Thêm công thức vào mảng savedRecipes của người dùng
         const updatedUser = await User.findByIdAndUpdate(userId, {
-            $addToSet: { savedRecipes: recipeId } // Sử dụng $addToSet để tránh trùng lặp
-        }, { new: true }); // Option { new: true } để nhận lại dữ liệu đã cập nhật
+            $addToSet: { savedRecipes: recipeId }
+        }, { new: true }); 
 
         if (updatedUser) {
             res.status(200).send('Công thức đã được lưu.');
@@ -98,7 +97,7 @@ router.post('/create', authMiddleware, async (req, res) => {
             steps: req.body.steps,
             times: req.body.times,
             difficult: req.body.difficult,
-            author: user.nickname, 
+            author: user.nickname,
             image: req.body.image,
             authorImg: user.avatarUrl
         });
@@ -126,14 +125,36 @@ router.get('/my-recipes', authMiddleware, async (req, res) => {
 });
 router.post('/upload-recipe-image', upload.single('image'), (req, res) => {
     if (!req.file) {
-      return res.status(400).send('Không có file ảnh nào được tải lên.');
+        return res.status(400).send('Không có file ảnh nào được tải lên.');
     }
-  
-    // Lấy URL của file ảnh
     const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
     res.json({ success: true, imageUrl });
-  });
-  
+});
+
+router.delete('/delete/:recipeId', authMiddleware, async (req, res) => {
+    try {
+        const recipeId = req.params.recipeId;
+        const recipe = await Recipe.findById(recipeId);
+
+        if (!recipe) {
+            return res.status(404).json({ message: 'Công thức không tìm thấy' });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'Người dùng không tìm thấy' });
+        }
+
+        if (recipe.author !== user.nickname) {
+            return res.status(401).json({ message: 'Bạn không có quyền xóa công thức này' });
+        }
+
+        await Recipe.deleteOne({ _id: recipeId });
+        res.status(200).json({ message: 'Công thức đã được xóa' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 router.get('/author/:authorName', recipeController.getRecipesByAuthor);
 
