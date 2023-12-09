@@ -10,7 +10,6 @@ router.post('/updateAvatar', authMiddleware, async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(req.user.id, { avatarUrl }, { new: true });
 
-    // Sau khi cập nhật avatar, cập nhật authorImg trong tất cả công thức của người dùng này
     await Recipe.updateMany({ author: updatedUser.nickname }, { authorImg: avatarUrl });
 
     res.json({ success: true, updatedUser });

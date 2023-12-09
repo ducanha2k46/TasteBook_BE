@@ -6,10 +6,12 @@ const authMiddleware = require('../middleware/authMiddleware');
 const Recipe = require('../models/recipeModel');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+const axios = require('axios');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/') 
+        cb(null, 'uploads/')
     },
     filename: function (req, file, cb) {
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
@@ -19,13 +21,13 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 router.post('/save-recipe/:recipeId', authMiddleware, async (req, res) => {
     const userId = req.user.id;
-    const { recipeId } = req.params; 
+    const { recipeId } = req.params;
     console.log('UserId:', userId, 'RecipeId:', recipeId);
 
     try {
         const updatedUser = await User.findByIdAndUpdate(userId, {
             $addToSet: { savedRecipes: recipeId }
-        }, { new: true }); 
+        }, { new: true });
 
         if (updatedUser) {
             res.status(200).send('Công thức đã được lưu.');
@@ -35,6 +37,55 @@ router.post('/save-recipe/:recipeId', authMiddleware, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send('Có lỗi xảy ra khi lưu công thức.');
+    }
+});
+const FormData = require('form-data');
+function extractDisplayNames(data) {
+    const items = data.items || [];
+    let displayNames = [];
+
+    items.forEach(item => {
+        item.food.forEach(foodItem => {
+            if (foodItem.confidence >= 0.7) {
+                displayNames.push(foodItem.food_info.display_name);
+            }
+        });
+    });
+
+    return displayNames;
+}
+router.post('/analyze-image', upload.single('image'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('Không có file ảnh nào được tải lên.');
+    }
+
+    try {
+        const form = new FormData();
+        const filePath = req.file.path;
+        form.append('image', fs.createReadStream(filePath));
+
+        const foodvisorResponse = await axios.post(
+            'https://vision.foodvisor.io/api/1.0/en/analysis/AnalysisFood',
+            form,
+            {
+                headers: {
+                    ...form.getHeaders(),
+                    'Authorization': 'Api-Key yCjRu9LP.xBAgLcGUs3wwbdWTpRdCVZhiExhNeDi0'
+                }
+            }
+        );
+
+        // Xóa file sau khi gửi
+        fs.unlinkSync(filePath);
+        const displayNames = extractDisplayNames(foodvisorResponse.data);
+        res.json({ displayNames: displayNames });
+    } catch (error) {
+        console.error('Lỗi khi phân tích ảnh:', error);
+        if (error.response) {
+            console.error('Phản hồi từ API:', error.response.data);
+        }
+        res.status(500).send('Lỗi server khi phân tích ảnh');
+        
     }
 });
 

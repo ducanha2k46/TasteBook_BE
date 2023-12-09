@@ -43,8 +43,14 @@ exports.searchRecipes = async (req, res) => {
     try {
         const { query } = req.params;
         const searchTerms = query.split(" ").map(term => new RegExp(term, 'i'));
+        const regexQuery = new RegExp(query, 'i');
         const recipes = await Recipe.find({
-            ingredients: { $all: searchTerms.map(term => ({ $elemMatch: { $regex: term } })) }
+            $or: [
+                { name: { $regex: regexQuery } },
+                { author: { $regex: regexQuery } },
+                { ingredients: { $all: searchTerms.map(term => ({ $elemMatch: { $regex: term } })) } }
+            ]
+
         });
 
         res.json(recipes);
@@ -57,7 +63,7 @@ exports.searchRecipes = async (req, res) => {
 exports.getSuggestions = async (req, res) => {
     try {
         const { term } = req.params;
-        const regexTerm = new RegExp(term, 'i'); 
+        const regexTerm = new RegExp(term, 'i');
         const suggestions = await Recipe.find({
             ingredients: { $elemMatch: { $regex: regexTerm } }
         }).limit(5);
@@ -79,6 +85,6 @@ exports.getRecipeById = async (req, res) => {
         res.json(recipe);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send({message: 'Server Error'});
+        res.status(500).send({ message: 'Server Error' });
     }
 };
