@@ -10,7 +10,9 @@ Nguyễn Đức Anh 20020095
 *Ví dụ bạn lưu dự án vào thư mục Project và backend được lưu trong folder backend*
 
 **MONGO_URI=mongodb+srv://ducanh:ztUPzfqjcSV6OW3v@cluster0.hq256hd.mongodb.net/Taste-Book?retryWrites=true&w=majority**
+
 **ACCESS_TOKEN_SECRET=** *Tạo token secret riêng cho bạn*
+
 **PORT=5000**
 
 ## Install package 
